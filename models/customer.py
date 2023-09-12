@@ -1,34 +1,49 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from base import Base, Session
+from models.base import Base
 from models.review import Review
 
 class Customer(Base):
     __tablename__ = 'customers'
+
     id = Column(Integer, primary_key=True)
-    first_name = Column(String)
-    last_name = Column(String)
-    reviews = relationship('Review', back_populates='customer')
+    given_name = Column(String)
+    family_name = Column(String)
 
-    def reviews(self):
-        return self.reviews
+    reviews = relationship('Review', back_populates='customer')  
 
-    def restaurants(self):
-        return [review.restaurant for review in self.reviews]
+    def __init__(self, given_name, family_name):
+        self.given_name = given_name
+        self.family_name = family_name
+
+    def given_name(self):
+        return self.given_name
+
+    def family_name(self):
+        return self.family_name
 
     def full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.given_name} {self.family_name}"
 
-    def favorite_restaurant(self):
-        return max(self.reviews, key=lambda review: review.rating).restaurant
+    @classmethod
+    def all(cls, session):
+        return session.query(cls).all()
 
-    def add_review(self, restaurant, rating):
-        new_review = Review(restaurant=restaurant, customer=self, rating=rating)
+    def restaurants(self, session):
+        return list({review.restaurant for review in self.reviews})
+
+    def add_review(self, session, restaurant, rating):
+        new_review = Review(self, restaurant, rating)
         session.add(new_review)
-        session.commit()
 
-    def delete_reviews(self, restaurant):
-        reviews_to_delete = [review for review in self.reviews if review.restaurant == restaurant]
-        for review in reviews_to_delete:
-            session.delete(review)
-        session.commit()
+    def num_reviews(self, session):
+        return len(self.reviews)
+
+    @classmethod
+    def find_by_name(cls, session, full_name):
+        given_name, family_name = full_name.split()
+        return session.query(cls).filter_by(given_name=given_name, family_name=family_name).first()
+
+    @classmethod
+    def find_all_by_given_name(cls, session, given_name):
+        return session.query(cls).filter_by(given_name=given_name).all()
