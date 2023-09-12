@@ -1,4 +1,4 @@
-
+# review.py
 from sqlalchemy import Column, Integer, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from models.base import Base
@@ -13,14 +13,12 @@ class Review(Base):
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
 
     customer = relationship('Customer', back_populates='reviews')
+    restaurant = relationship('Restaurant', back_populates='reviews')
 
     def __init__(self, customer, restaurant, rating):
         self.customer = customer
         self.restaurant = restaurant
         self.rating = rating
-
-    def rating(self):
-        return self.rating
 
     @classmethod
     def all(cls, session):

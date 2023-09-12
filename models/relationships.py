@@ -5,8 +5,8 @@ from restaurant import Restaurant
 
 # Defining relationships
 
-Review.customer = relationship(Customer, back_populates='reviews')
-Review.restaurant = relationship(Restaurant, back_populates='review_relationship')
+Review.customer = relationship(Customer, back_populates='review')
+Review.restaurant = relationship(Restaurant, back_populates='review')
 Customer.reviews = relationship(Review, back_populates='customer')
-Restaurant.review_relationship = relationship(Review, back_populates='restaurant')
+Restaurant.reviews = relationship(Review, back_populates='restaurant')
 
